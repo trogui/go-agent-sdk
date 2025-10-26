@@ -73,4 +73,4 @@ The agent keeps cycling until the API returns `finish_reason == "stop"` or `MaxL
 - Always validate and sanitize tool arguments before acting on them.
 - Return concise JSON from tools; the agent sends it verbatim to the model.
 - Use `MaxLoops` to keep long-running tool chains under control.
-- Inspect `Response.Usage` for token accounting and to decide whether to stop earlier.
+- Inspect `Response.Usage` for token accounting and to decide whether to stop earlier.(Only woks with Openrouter)

@@ -133,6 +133,13 @@ func (a *Agent) RegisterTool(tool *Tool) {
 	a.tools[tool.Name] = tool
 }
 
+// RegisterTools registers multiple tools
+func (a *Agent) RegisterTools(tools ...*Tool) {
+	for _, tool := range tools {
+		a.RegisterTool(tool)
+	}
+}
+
 // NewSession creates a new interactive session with the agent
 func (a *Agent) NewSession(ctx context.Context) *Session {
 	sessionCtx, cancel := context.WithCancel(ctx)

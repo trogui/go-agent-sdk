@@ -150,91 +150,87 @@ func main() {
 		log.Fatalf("Failed to create agent: %v", err)
 	}
 
-	// Register tool: add_task
-	ag.RegisterTool(&agent.Tool{
-		Name:        "add_task",
-		Description: "Add a new task to the list",
-		Parameters: map[string]agent.Parameter{
-			"title": {
-				Type:        "string",
-				Description: "Task description",
+	// Register tools
+	ag.RegisterTools(
+		&agent.Tool{
+			Name:        "add_task",
+			Description: "Add a new task to the list",
+			Parameters: map[string]agent.Parameter{
+				"title": {
+					Type:        "string",
+					Description: "Task description",
+				},
 			},
-		},
-		Required: []string{"title"},
-		Handler: func(args json.RawMessage) (any, error) {
-			var payload struct {
-				Title string `json:"title"`
-			}
-			if err := json.Unmarshal(args, &payload); err != nil {
-				return nil, err
-			}
+			Required: []string{"title"},
+			Handler: func(args json.RawMessage) (any, error) {
+				var payload struct {
+					Title string `json:"title"`
+				}
+				if err := json.Unmarshal(args, &payload); err != nil {
+					return nil, err
+				}
 
-			task := db.AddTask(payload.Title)
-			return map[string]any{
-				"id":     task.ID,
-				"title":  task.Title,
-				"status": "created",
-			}, nil
-		},
-	})
-
-	// Register tool: list_tasks
-	ag.RegisterTool(&agent.Tool{
-		Name:        "list_tasks",
-		Description: "Show all tasks",
-		Parameters:  map[string]agent.Parameter{},
-		Required:    []string{},
-		Handler: func(args json.RawMessage) (any, error) {
-			return map[string]interface{}{
-				"tasks": db.GetTasksList(),
-			}, nil
-		},
-	})
-
-	// Register tool: complete_task
-	ag.RegisterTool(&agent.Tool{
-		Name:        "complete_task",
-		Description: "Mark a task as completed",
-		Parameters: map[string]agent.Parameter{
-			"id": {
-				Type:        "integer",
-				Description: "Task ID",
-			},
-		},
-		Required: []string{"id"},
-		Handler: func(args json.RawMessage) (any, error) {
-			var payload struct {
-				ID int `json:"id"`
-			}
-			if err := json.Unmarshal(args, &payload); err != nil {
-				return nil, err
-			}
-
-			task, found := db.CompleteTask(payload.ID)
-			if !found {
-				return map[string]string{
-					"error": fmt.Sprintf("Task with ID %d not found", payload.ID),
+				task := db.AddTask(payload.Title)
+				return map[string]any{
+					"id":     task.ID,
+					"title":  task.Title,
+					"status": "created",
 				}, nil
-			}
-
-			return map[string]interface{}{
-				"id":     task.ID,
-				"title":  task.Title,
-				"status": "completed",
-			}, nil
+			},
 		},
-	})
-
-	// Register tool: get_stats
-	ag.RegisterTool(&agent.Tool{
-		Name:        "get_stats",
-		Description: "Get task statistics",
-		Parameters:  map[string]agent.Parameter{},
-		Required:    []string{},
-		Handler: func(args json.RawMessage) (any, error) {
-			return db.GetStats(), nil
+		&agent.Tool{
+			Name:        "list_tasks",
+			Description: "Show all tasks",
+			Parameters:  map[string]agent.Parameter{},
+			Required:    []string{},
+			Handler: func(args json.RawMessage) (any, error) {
+				return map[string]interface{}{
+					"tasks": db.GetTasksList(),
+				}, nil
+			},
 		},
-	})
+		&agent.Tool{
+			Name:        "complete_task",
+			Description: "Mark a task as completed",
+			Parameters: map[string]agent.Parameter{
+				"id": {
+					Type:        "integer",
+					Description: "Task ID",
+				},
+			},
+			Required: []string{"id"},
+			Handler: func(args json.RawMessage) (any, error) {
+				var payload struct {
+					ID int `json:"id"`
+				}
+				if err := json.Unmarshal(args, &payload); err != nil {
+					return nil, err
+				}
+
+				task, found := db.CompleteTask(payload.ID)
+				if !found {
+					return map[string]string{
+						"error": fmt.Sprintf("Task with ID %d not found", payload.ID),
+					}, nil
+				}
+
+				return map[string]interface{}{
+					"id":     task.ID,
+					"title":  task.Title,
+					"status": "completed",
+				}, nil
+			},
+		},
+		&agent.Tool{
+			Name:        "get_stats",
+			Description: "Get task statistics",
+			Parameters:  map[string]agent.Parameter{},
+			Required:    []string{},
+			Handler: func(args json.RawMessage) (any, error) {
+				return db.GetStats(), nil
+			},
+		},
+	)
 
 	// Start interactive session
 	ctx := context.Background()

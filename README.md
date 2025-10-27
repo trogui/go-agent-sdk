@@ -19,6 +19,8 @@ ag, err := agent.New(agent.Config{
 
 ## Registering Tools
 
+### Single Tool
+
 ```go
 ag.RegisterTool(&agent.Tool{
     Name:        "searchBooks",
@@ -40,6 +42,25 @@ ag.RegisterTool(&agent.Tool{
         return search(payload.Query), nil
     },
 })
+```
+
+### Multiple Tools
+
+To register multiple tools at once, use `RegisterTools`:
+
+```go
+ag.RegisterTools(
+    &agent.Tool{
+        Name:        "searchBooks",
+        Description: "Search the catalog by keyword",
+        // ... parameters and handler
+    },
+    &agent.Tool{
+        Name:        "getPrice",
+        Description: "Get the price of a book",
+        // ... parameters and handler
+    },
+)
 ```
 
 The handler gets the raw JSON arguments coming from the model. Return any Go value; it will be serialized back to JSON and fed to the model as the tool output.
